@@ -74,7 +74,7 @@ namespace PalmHill.BlazorChat.Server.SignalR
 
 
             inferenceStopwatch.Start();
-            var asyncResponse = ChatCompletion?.GetStreamingChatMessageContentsAsync(chatHistory, inferenceParams, cancellationToken: cancellationToken);
+            var asyncResponse = ChatCompletion?.GetStreamingChatMessageContentsAsync(chatHistory, inferenceParams, kernel:LlamaKernel.Kernel, cancellationToken:cancellationToken);
 
             if (asyncResponse == null)
             {

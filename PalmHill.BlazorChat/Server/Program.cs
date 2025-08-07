@@ -7,10 +7,9 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Initlize Llama
-builder.AddLlamaModel();
+// builder.AddLlamaModel();
 // End Initlize Llama
-
-
+builder.Services.AddScoped<IKernelPlugin, KernelPlugin>();
 builder.Services.AddSingleton<LlamaKernel>();
 
 

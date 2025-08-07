@@ -35,14 +35,14 @@ namespace PalmHill.BlazorChat.Server.WebApi
         {
             WebSocketChat = webSocketChat;
             LlamaKernel = llamaKernel;
-            LlmMemory = llamaKernel.Kernel.Services.GetService<ServerlessLlmMemory>();
+            // LlmMemory = llamaKernel.Kernel.Services.GetService<ServerlessLlmMemory>();
             ChatCompletion = llamaKernel.Kernel.Services.GetService<IChatCompletionService>();
             _logger = logger;
         }
 
         private IHubContext<WebSocketChat> WebSocketChat { get; }
         public LlamaKernel LlamaKernel { get; }
-        public ServerlessLlmMemory? LlmMemory { get; }
+        // public ServerlessLlmMemory? LlmMemory { get; }
         public IChatCompletionService? ChatCompletion { get; }
         private ILogger<ApiChatController> _logger { get; }
 
@@ -87,52 +87,52 @@ namespace PalmHill.BlazorChat.Server.WebApi
             return StatusCode(500, errorText);
         }
 
-        [HttpPost("docs")]
-        public async Task<ActionResult<ChatMessage>> Ask(InferenceRequest chatConversation)
-        {
-            if (LlmMemory == null)
-            {
-                var result = StatusCode(503, "No LlmMemory loaded.");
-                return result;
-            }
-
-            var conversationId = chatConversation.Id;
-            var cancellationTokenSource = new CancellationTokenSource();
-            ChatCancellation.CancellationTokens[conversationId] = cancellationTokenSource;
-
-            var question = chatConversation.ChatMessages.LastOrDefault()?.Message;
-            if (question == null)
-            {
-                return BadRequest("No question provided.");
-            }
-
-            try
-            {
-                var answer = await LlmMemory.Ask(conversationId.ToString(), question, cancellationTokenSource.Token);
-
-                var chatMessageAnswer = new ChatMessage()
-                {
-                    Role = ChatMessageRole.Assistant,
-                    Message = answer.Result,
-                    AttachmentIds = answer.RelevantSources.Select(s => s.SourceName).ToList()
-                };
-
-                if (cancellationTokenSource.Token.IsCancellationRequested)
-                {
-                    throw new OperationCanceledException(cancellationTokenSource.Token);
-                }
-
-                return chatMessageAnswer;
-            }
-            catch (OperationCanceledException ex)
-            {
-                return StatusCode(444, ex.ToString());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.ToString());
-            }
-        }
+        // [HttpPost("docs")]
+        // public async Task<ActionResult<ChatMessage>> Ask(InferenceRequest chatConversation)
+        // {
+        //     if (LlmMemory == null)
+        //     {
+        //         var result = StatusCode(503, "No LlmMemory loaded.");
+        //         return result;
+        //     }
+        //
+        //     var conversationId = chatConversation.Id;
+        //     var cancellationTokenSource = new CancellationTokenSource();
+        //     ChatCancellation.CancellationTokens[conversationId] = cancellationTokenSource;
+        //
+        //     var question = chatConversation.ChatMessages.LastOrDefault()?.Message;
+        //     if (question == null)
+        //     {
+        //         return BadRequest("No question provided.");
+        //     }
+        //
+        //     try
+        //     {
+        //         var answer = await LlmMemory.Ask(conversationId.ToString(), question, cancellationTokenSource.Token);
+        //
+        //         var chatMessageAnswer = new ChatMessage()
+        //         {
+        //             Role = ChatMessageRole.Assistant,
+        //             Message = answer.Result,
+        //             AttachmentIds = answer.RelevantSources.Select(s => s.SourceName).ToList()
+        //         };
+        //
+        //         if (cancellationTokenSource.Token.IsCancellationRequested)
+        //         {
+        //             throw new OperationCanceledException(cancellationTokenSource.Token);
+        //         }
+        //
+        //         return chatMessageAnswer;
+        //     }
+        //     catch (OperationCanceledException ex)
+        //     {
+        //         return StatusCode(444, ex.ToString());
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, ex.ToString());
+        //     }
+        // }
 
         [HttpDelete("cancel/{conversationId}", Name = "CancelChat")]
         public async Task<bool> CancelChat(Guid conversationId)
